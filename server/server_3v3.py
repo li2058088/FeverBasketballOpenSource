@@ -167,9 +167,9 @@ if __name__ == "__main__":
     # algorithm check
     if args.multi:
         try:
-            assert args.algorithm in ['hyq', 'exq', 'vdn', 'qmix']
+            assert args.algorithm in ['hyq', 'exq', 'vdn', 'qmix', 'wqmix', 'qplex', 'qtran']
         except:
-            raise TypeError('Please use algorithms for multi-agent training, such as [hyq, exq, vdn, qmix]')
+            raise TypeError('Please use algorithms for multi-agent training, such as [hyq, exq, vdn, qmix, wqmix, qplex, qtran]')
     else:
         try:
             assert args.algorithm in ['dqn']

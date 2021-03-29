@@ -140,7 +140,6 @@ class Method(object):
                     ans_adv_ = Qplex_mixer(self.q_concat_, self.S_, self.n_agents, self.num_global_s, max_q_i=self.q_m_, actions=self.a_, is_v=False)
                     self.Q_tot_ = ans_chosen_ + ans_adv_
 
-            # todo: add q_target, loss, train_op
             with tf.variable_scope('q_target'):
                 q_target = self.R + (1 - self.done) * self.gamma * self.Q_tot_
                 self.q_target = tf.stop_gradient(q_target)
@@ -293,8 +292,6 @@ class Method(object):
         _, cost = self.sess.run([self._train_op, self.loss],
                                 feed_dict={self.S: S, self.s:s, self.a: actions_1hot,
                                            self.R: R, self.Q_tot_: q_tot_, self.done: done, self.q_m: q_m})
-        # print('cost', cost)
-
         self.write_summary_scalar('loss', cost, self.learn_step_cnt)
         self.write_summary_scalar('epsilon', self.epsilon, self.learn_step_cnt)
         self.write_summary_scalar('memory_cnt', self.memory_counter, self.learn_step_cnt)

@@ -43,8 +43,6 @@ class Method(object):
         self.exp_splicer = {}
         self.exp_splicing_lock = threading.RLock()
         self.update_queue = queue.Queue()
-        self.l1_hidden_units = 128
-        self.l2_hidden_units = 128
         self.m_units = 32
         self._build_net()
         t_params = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=self.name + '/target_net')
@@ -108,11 +106,11 @@ class Method(object):
             # ------------------ build evaluate_net ------------------
             with tf.variable_scope('eval_net'):
                 # --- for agent1 ---
-                a1_fc1 = tf.layers.dense(self.s1, self.l1_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a1_fc1 = tf.layers.dense(self.s1, 128, tf.nn.relu, kernel_initializer=w_initializer,
                                          bias_initializer=b_initializer, name='a1_fc1_e')
-                # a1_fc2 = tf.layers.dense(a1_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
-                #                          bias_initializer=b_initializer, name='a1_fc2_e')
-                a1_fc3 = tf.layers.dense(a1_fc1, self.l2_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a1_fc2 = tf.layers.dense(a1_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
+                                         bias_initializer=b_initializer, name='a1_fc2_e')
+                a1_fc3 = tf.layers.dense(a1_fc2, 64, tf.nn.relu, kernel_initializer=w_initializer,
                                          bias_initializer=b_initializer, name='a1_fc3_e')
                 self.q1_eval = tf.layers.dense(a1_fc3, self.num_a, kernel_initializer=w_initializer,
                                                bias_initializer=b_initializer, name='q1_e')
@@ -122,11 +120,11 @@ class Method(object):
                 self.q1_argmax = tf.argmax(self.q1_eval, axis=1)
 
                 # -- for agent2 ---
-                a2_fc1 = tf.layers.dense(self.s2, self.l1_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a2_fc1 = tf.layers.dense(self.s2, 128, tf.nn.relu, kernel_initializer=w_initializer,
                                          bias_initializer=b_initializer, name='a2_fc1_e')
-                # a2_fc2 = tf.layers.dense(a2_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
-                #                          bias_initializer=b_initializer, name='a2_fc2_e')
-                a2_fc3 = tf.layers.dense(a2_fc1, self.l2_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a2_fc2 = tf.layers.dense(a2_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
+                                         bias_initializer=b_initializer, name='a2_fc2_e')
+                a2_fc3 = tf.layers.dense(a2_fc2, 64, tf.nn.relu, kernel_initializer=w_initializer,
                                          bias_initializer=b_initializer, name='a2_fc3_e')
                 self.q2_eval = tf.layers.dense(a2_fc3, self.num_a, kernel_initializer=w_initializer,
                                                bias_initializer=b_initializer, name='q2_e')
@@ -136,11 +134,11 @@ class Method(object):
                 self.q2_argmax = tf.argmax(self.q2_eval, axis=1)
 
                 # -- for agent3 ---
-                a3_fc1 = tf.layers.dense(self.s3, self.l1_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a3_fc1 = tf.layers.dense(self.s3, 128, tf.nn.relu, kernel_initializer=w_initializer,
                                          bias_initializer=b_initializer, name='a3_fc1_e')
-                # a3_fc2 = tf.layers.dense(a3_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
-                #                          bias_initializer=b_initializer, name='a3_fc2_e')
-                a3_fc3 = tf.layers.dense(a3_fc1, self.l2_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a3_fc2 = tf.layers.dense(a3_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
+                                         bias_initializer=b_initializer, name='a3_fc2_e')
+                a3_fc3 = tf.layers.dense(a3_fc2, 64, tf.nn.relu, kernel_initializer=w_initializer,
                                          bias_initializer=b_initializer, name='a3_fc3_e')
                 self.q3_eval = tf.layers.dense(a3_fc3, self.num_a, kernel_initializer=w_initializer,
                                                bias_initializer=b_initializer, name='q3_e')
@@ -152,29 +150,29 @@ class Method(object):
             # ------------------ build target_net ------------------
             with tf.variable_scope('target_net'):
                 # --- for agent1 ---
-                a1_fc1_ = tf.layers.dense(self.s1_, self.l1_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a1_fc1_ = tf.layers.dense(self.s1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
                                           bias_initializer=b_initializer, name='a1_fc1_t')
-                # a1_fc2_ = tf.layers.dense(a1_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
-                #                           bias_initializer=b_initializer, name='a1_fc2_t')
-                a1_fc3_ = tf.layers.dense(a1_fc1_, self.l2_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a1_fc2_ = tf.layers.dense(a1_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
+                                          bias_initializer=b_initializer, name='a1_fc2_t')
+                a1_fc3_ = tf.layers.dense(a1_fc2_, 64, tf.nn.relu, kernel_initializer=w_initializer,
                                           bias_initializer=b_initializer, name='a1_fc3_t')
                 self.q1_next = tf.layers.dense(a1_fc3_, self.num_a, kernel_initializer=w_initializer,
                                                bias_initializer=b_initializer, name='q1_t')
                 # --- for agent2 ---
-                a2_fc1_ = tf.layers.dense(self.s2_, self.l1_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a2_fc1_ = tf.layers.dense(self.s2_, 128, tf.nn.relu, kernel_initializer=w_initializer,
                                           bias_initializer=b_initializer, name='a2_fc1_t')
-                # a2_fc2_ = tf.layers.dense(a2_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
-                #                           bias_initializer=b_initializer, name='a2_fc2_t')
-                a2_fc3_ = tf.layers.dense(a2_fc1_, self.l2_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a2_fc2_ = tf.layers.dense(a2_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
+                                          bias_initializer=b_initializer, name='a2_fc2_t')
+                a2_fc3_ = tf.layers.dense(a2_fc2_, 64, tf.nn.relu, kernel_initializer=w_initializer,
                                           bias_initializer=b_initializer, name='a2_fc3_t')
                 self.q2_next = tf.layers.dense(a2_fc3_, self.num_a, kernel_initializer=w_initializer,
                                                bias_initializer=b_initializer, name='q2_t')
                 # --- for agent3 ---
-                a3_fc1_ = tf.layers.dense(self.s3_, self.l1_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a3_fc1_ = tf.layers.dense(self.s3_, 128, tf.nn.relu, kernel_initializer=w_initializer,
                                           bias_initializer=b_initializer, name='a3_fc1_t')
-                # a3_fc2_ = tf.layers.dense(a3_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
-                #                           bias_initializer=b_initializer, name='a3_fc2_t')
-                a3_fc3_ = tf.layers.dense(a3_fc1_, self.l2_hidden_units, tf.nn.relu, kernel_initializer=w_initializer,
+                a3_fc2_ = tf.layers.dense(a3_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
+                                          bias_initializer=b_initializer, name='a3_fc2_t')
+                a3_fc3_ = tf.layers.dense(a3_fc2_, 64, tf.nn.relu, kernel_initializer=w_initializer,
                                           bias_initializer=b_initializer, name='a3_fc3_t')
                 self.q3_next = tf.layers.dense(a3_fc3_, self.num_a, kernel_initializer=w_initializer,
                                                bias_initializer=b_initializer, name='q3_t')
@@ -399,12 +397,6 @@ class Method(object):
             self.a3: a3
         })
 
-        # q1_m_ = np.max(q1_, axis=1)
-        # q2_m_ = np.max(q2_, axis=1)
-        # q3_m_ = np.max(q3_, axis=1)
-        # q_tot_ = self.sess.run(self.Q_tot_,
-        #                        feed_dict={self.S: S_, self.q1_m_: q1_m_, self.q2_m_: q2_m_, self.q3_m_: q3_m_})
-
         _, cost = self.sess.run([self._train_op, self.loss],
                                 feed_dict={self.S: S, self.s1: s1, self.s2: s2, self.s3: s3,
                                            self.a1: a1, self.a2: a2, self.a3: a3,
@@ -415,8 +407,6 @@ class Method(object):
                                            self.hat_q_tot_nopt_phd: hat_q_tot_nopt_values
                                            #self.Q_tot_: q_tot_,
                                            })
-
-        # print('cost', cost)
 
         self.write_summary_scalar('loss', cost, self.learn_step_cnt)
         self.write_summary_scalar('epsilon', self.epsilon, self.learn_step_cnt)
@@ -444,103 +434,6 @@ class Method(object):
 
     def write_summary_scalar(self, tag, value, iteration):
         self.train_writer.add_summary(tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=value)]), iteration)
-
-
-
-    # def _build_net_(self):  # we use parameter sharing among agents
-    #     with tf.variable_scope(self.name):
-    #         # ------------------ all inputs ------------------------
-    #         self.S = tf.placeholder(tf.float32, [None, self.num_global_s], name='S')  # input Global State
-    #         self.s = tf.placeholder(tf.float32, [None, self.num_s], name='s1')  # input state for agent1
-    #         self.s2 = tf.placeholder(tf.float32, [None, self.num_s], name='s2')  # input state for agent2
-    #         self.s3 = tf.placeholder(tf.float32, [None, self.num_s], name='s3')  # input state for agent3
-    #         self.S_ = tf.placeholder(tf.float32, [None, self.num_global_s], name='S_')  # input Next Global State
-    #         self.s_ = tf.placeholder(tf.float32, [None, self.num_s], name='s1_')  # input next state for agent1
-    #         self.s2_ = tf.placeholder(tf.float32, [None, self.num_s], name='s2_')  # input next state for agent2
-    #         self.s3_ = tf.placeholder(tf.float32, [None, self.num_s], name='s3_')  # input next state for agent3
-    #         self.R = tf.placeholder(tf.float32, [None, ], name='R')  # input Reward
-    #         self.a1 = tf.placeholder(tf.int32, [None, ], name='a1')  # input Action for agent1
-    #         self.a2 = tf.placeholder(tf.int32, [None, ], name='a2')  # input Action for agent2
-    #         self.a3 = tf.placeholder(tf.int32, [None, ], name='a3')  # input Action for agent3
-    #         self.done = tf.placeholder(tf.float32, [None, ], name='done')  # input Done info ???
-    #
-    #         # self.q1_a1 = tf.placeholder(tf.float32, [None, ], name='q1_eval_value_wrt_a1')
-    #         # self.q2_a2 = tf.placeholder(tf.float32, [None, ], name='q2_eval_value_wrt_a2')
-    #         # self.q3_a3 = tf.placeholder(tf.float32, [None, ], name='q3_eval_value_wrt_a3')
-    #         self.q1_m_ = tf.placeholder(tf.float32, [None, ], name='q1_value_next_max')
-    #         self.q2_m_ = tf.placeholder(tf.float32, [None, ], name='q2_value_next_max')
-    #         self.q3_m_ = tf.placeholder(tf.float32, [None, ], name='q3_value_next_max')
-    #
-    #         w_initializer, b_initializer = tf.random_normal_initializer(0., 0.1), tf.constant_initializer(0.0)
-    #
-    #         # ------------------ build evaluate_net ------------------
-    #         with tf.variable_scope('eval_net'):
-    #             a_fc1 = tf.layers.dense(self.s, 128, tf.nn.relu, kernel_initializer=w_initializer,
-    #                                     bias_initializer=b_initializer, name='agent_fc1_e')
-    #             a_fc2 = tf.layers.dense(a_fc1, 128, tf.nn.relu, kernel_initializer=w_initializer,
-    #                                     bias_initializer=b_initializer, name='agent_fc2_e')
-    #             a_fc3 = tf.layers.dense(a_fc2, 64, tf.nn.relu, kernel_initializer=w_initializer,
-    #                                     bias_initializer=b_initializer, name='agent_fc3_e')
-    #             self.q_eval = tf.layers.dense(a_fc3, self.num_a, kernel_initializer=w_initializer,
-    #                                           bias_initializer=b_initializer, name='q_e')
-    #
-    #         # ------------------ build target_net ------------------
-    #         with tf.variable_scope('target_net'):
-    #             a_fc1_ = tf.layers.dense(self.s_, 128, tf.nn.relu, kernel_initializer=w_initializer,
-    #                                      bias_initializer=b_initializer, name='agent_fc1_t')
-    #             a_fc2_ = tf.layers.dense(a_fc1_, 128, tf.nn.relu, kernel_initializer=w_initializer,
-    #                                      bias_initializer=b_initializer, name='agent_fc2_t')
-    #             a_fc3_ = tf.layers.dense(a_fc2_, 64, tf.nn.relu, kernel_initializer=w_initializer,
-    #                                      bias_initializer=b_initializer, name='agent_fc3_t')
-    #             self.q_next = tf.layers.dense(a_fc3_, self.num_a, kernel_initializer=w_initializer,
-    #                                           bias_initializer=b_initializer, name='q_t')
-    #
-    #         # ------------------ build mixing_net ------------------
-    #         with tf.variable_scope('mixing_net'):
-    #             a1_indices = tf.stack([tf.range(tf.shape(self.a1)[0], dtype=tf.int32), self.a1], axis=1, name='a1_indices')
-    #             a2_indices = tf.stack([tf.range(tf.shape(self.a2)[0], dtype=tf.int32), self.a2], axis=1, name='a2_indices')
-    #             a3_indices = tf.stack([tf.range(tf.shape(self.a3)[0], dtype=tf.int32), self.a3], axis=1, name='a3_indices')
-    #             q1_a = tf.gather_nd(params=self.q1_eval, indices=a1_indices, name='q1_eval_wrt_a')
-    #             q2_a = tf.gather_nd(params=self.q2_eval, indices=a2_indices, name='q2_eval_wrt_a')
-    #             q3_a = tf.gather_nd(params=self.q3_eval, indices=a3_indices, name='q3_eval_wrt_a')
-    #             # self.q_concat = tf.stack([self.q1_a1, self.q2_a2, self.q3_a3], axis=1, name='q_concat')
-    #             self.q_concat_ = tf.stack([self.q1_m_, self.q2_m_, self.q3_m_], axis=1, name='q_concat_next')  # todo
-    #
-    #             # with tf.variable_scope('eval_net'):
-    #             with tf.variable_scope('hyper_layer1'):
-    #                 non_abs_w1 = tf.layers.dense(inputs=self.S, units=3*32, kernel_initializer=w_initializer,
-    #                                              bias_initializer=b_initializer, name='non_abs_w1')
-    #                 self.w1 = tf.reshape(tf.abs(non_abs_w1), shape=[-1, 3, 32], name='w1')
-    #                 self.b1 = tf.layers.dense(inputs=self.S, units=32, kernel_initializer=w_initializer,
-    #                                           bias_initializer=b_initializer, name='non_abs_b1')
-    #             with tf.variable_scope('hyper_layer2'):
-    #                 non_abs_w2 = tf.layers.dense(inputs=self.S, units=32 * 1, kernel_initializer=w_initializer,
-    #                                              bias_initializer=b_initializer, name='non_abs_w2')
-    #                 self.w2 = tf.reshape(tf.abs(non_abs_w2), shape=[-1, 32, 1], name='w2')
-    #                 bef_b2 = tf.layers.dense(inputs=self.S, units=32, activation=tf.nn.relu,
-    #                                          kernel_initializer=w_initializer, bias_initializer=b_initializer, name='bef_b2')
-    #                 self.b2 = tf.layers.dense(inputs=bef_b2, units=1, kernel_initializer=w_initializer,
-    #                                           bias_initializer=b_initializer, name='non_abs_b2')
-    #
-    #             with tf.variable_scope('layer_mix_eval'):
-    #                 lin1 = tf.matmul(tf.reshape(self.q_concat, shape=[-1, 1, 3]), self.w1) + tf.reshape(self.b1, shape=[-1, 1, 32])
-    #                 a1 = tf.nn.elu(lin1, name='a1')
-    #                 self.Q_tot = tf.reshape(tf.matmul(a1, self.w2), shape=[-1, 1]) + self.b2
-    #
-    #             with tf.variable_scope('layer_mix_target'):
-    #                 lin1_ = tf.matmul(tf.reshape(self.q_concat_, shape=[-1, 1, 3]), self.w1) + tf.reshape(self.b1, shape=[-1, 1, 32])
-    #                 a1_ = tf.nn.elu(lin1_, name='a1_')
-    #                 self.Q_tot_ = tf.reshape(tf.matmul(a1_, self.w2), shape=[-1, 1]) + self.b2
-    #
-    #         # todo: add q_target, loss, train_op
-    #         with tf.variable_scope('q_target'):
-    #             q_target = self.R + (1 - self.done) * self.gamma * self.Q_tot_
-    #             self.q_target = tf.stop_gradient(q_target)
-    #         with tf.variable_scope('loss'):
-    #             self.loss = tf.reduce_mean(tf.squared_difference(self.q_target, self.Q_tot, name='TD_error'))
-    #         with tf.variable_scope('train'):
-    #             self._train_op = tf.train.AdamOptimizer(self.lr).minimize(self.loss)
-
 
 
 
